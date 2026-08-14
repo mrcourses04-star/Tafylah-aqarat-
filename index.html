@@ -462,11 +462,44 @@
         }
 
     </script>
-    <script>
+    <!-- شريط تنبيه التثبيت المنبثق -->
+<div id="pwa-install-banner" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: #ffffff; color: #333; padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.25); z-index: 9999; text-align: center; font-family: sans-serif; border: 1px solid #e0e0e0;">
+  <p style="margin: 0 0 10px 0; font-size: 14px; font-weight: bold;">📱 ثبّت تطبيق عقارات الطفيلة لسهولة الوصول!</p>
+  <div style="display: flex; gap: 10px; justify-content: center;">
+    <button id="pwa-install-btn" style="background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer;">تثبيت الآن</button>
+    <button onclick="document.getElementById('pwa-install-banner').style.display='none'" style="background: #e0e0e0; color: #333; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer;">إغلاق</button>
+  </div>
+</div>
+
+<script>
+  // 1. تسجيل الـ Service Worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/Tafylah-aqarat-/sw.js');
   }
-    </script>
+
+  // 2. التقاط حدث التثبيت وإظهار الشريط المنبثق تلقائياً
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    // إظهار الشريط المنبثق للزائر
+    document.getElementById('pwa-install-banner').style.display = 'block';
+  });
+
+  // 3. عند ضغط الزائر على زر "تثبيت الآن"
+  document.getElementById('pwa-install-btn').addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+      }
+      deferredPrompt = null;
+      document.getElementById('pwa-install-banner').style.display = 'none';
+    }
+  });
+</script>
+    
     
 </body>
 </html>

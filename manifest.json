@@ -1,7 +1,7 @@
 {
   "name": "عقارات الطفيلة",
   "short_name": "عقارات",
-  "start_url": "/Tafylah-aqarat-/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#3367D6",

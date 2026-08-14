@@ -511,6 +511,7 @@ function requestNotificationPermission() {
 </div>
 
 <script>
+    
   // 1. تسجيل الـ Service Worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/Tafylah-aqarat-/sw.js');
@@ -537,7 +538,8 @@ function requestNotificationPermission() {
       document.getElementById('pwa-install-banner').style.display = 'none';
     }
   });
-<script>
+      </script>
+    
   // دالة طلب إذن الإشعارات وتوليد رمز الجهاز
   function requestNotificationPermission() {
     if (!("Notification" in window)) {

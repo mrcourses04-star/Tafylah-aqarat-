@@ -537,9 +537,9 @@ function requestNotificationPermission() {
       document.getElementById('pwa-install-banner').style.display = 'none';
     }
   });
-</
+<script>
   // دالة طلب إذن الإشعارات وتوليد رمز الجهاز
-function requestNotificationPermission() {
+  function requestNotificationPermission() {
     if (!("Notification" in window)) {
         alert("متصفحك لا يدعم إشعارات سطح المكتب");
         return;
@@ -552,11 +552,10 @@ function requestNotificationPermission() {
             alert("تم رفض إذن الإشعارات. يمكنك تفعيلها لاحقاً من إعدادات المتصفح.");
         }
     });
-}
-    
-script>
+  }
+</script>
 
- <div style="position: fixed; bottom: 20px; left: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 9999;">
+<div style="position: fixed; bottom: 20px; left: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 9999;">
 
   <button onclick="requestNotificationPermission()" title="تفعيل الإشعارات" style="background: #e67e22; color: white; border: none; border-radius: 50%; width: 48px; height: 48px; font-size: 22px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; display: flex; align-items: center; justify-content: center;">
     🔔

@@ -117,7 +117,7 @@
 
         <!-- 1️⃣ قسم تصفح العقارات -->
         <div id="browseTab" class="section active">
-            <div id="approvedPropertiesList"></div>
+            <div id="approvedPropertiesList"><p style='text-align:center; color:#777; font-size:13px;'>جاري تحميل الإعلانات...</p></div>
         </div>
 
         <!-- 2️⃣ قسم البحث -->
@@ -157,10 +157,10 @@
                 <input type="tel" id="newUserPhone" placeholder="07XXXXXXXX">
             </div>
             <div class="form-group">
-                <label>صورة العقار (يفضل أقل من 2 ميجا):</label>
+                <label>صورة العقار (يفضل أقل من 800 كيلوبايت):</label>
                 <input type="file" id="newImage" accept="image/*">
             </div>
-            <button class="btn-main" onclick="addNewProperty()">نشر العقار (بانتظار الموافقة)</button>
+            <button class="btn-main" onclick="addNewProperty()" id="addBtn">نشر العقار (بانتظار الموافقة)</button>
         </div>
 
         <!-- 4️⃣ لوحة الأدمن -->
@@ -173,11 +173,9 @@
                 <button class="btn-main btn-admin" onclick="checkAdminPassword()">دخول لوحة التحكم</button>
             </div>
             <div id="adminDashboardSection" style="display: none;">
-                <!-- قسم العقارات المعلقة -->
                 <h3 style="color: #1b4332; font-size: 15px; text-align: right; border-bottom: 2px solid #c59b27; padding-bottom: 5px;">إعلانات بانتظار الموافقة</h3>
                 <div id="adminPendingList"></div>
                 
-                <!-- قسم العقارات المنشورة -->
                 <h3 style="color: #1b4332; font-size: 15px; text-align: right; border-bottom: 2px solid #1b4332; padding-bottom: 5px; margin-top: 25px;">الإعلانات المنشورة حالياً</h3>
                 <div id="adminApprovedList"></div>
             </div>
@@ -186,45 +184,55 @@
         <a href="https://www.facebook.com/share/1JERWc6Fq6/" target="_blank" class="fb-link">زيارة صفحتنا على فيسبوك</a>
     </div>
 
-    <script>
-        // تهيئة المتغيرات والبيانات بشكل آمن لمنع تعطل التطبيق
-        var properties = [];
-        try {
-            var storedData = localStorage.getItem('tafilahRealEstate_V2');
-            if (storedData) {
-                properties = JSON.parse(storedData);
-            }
-        } catch (error) {
-            console.error("حدث خطأ في قراءة البيانات، تم تصفير القائمة.");
-            properties = [];
-        }
+    <!-- كود فايرباس والسكربت المدمج للعمل السحابي -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // دالة لحفظ البيانات
-        function saveProperties() {
-            try {
-                localStorage.setItem('tafilahRealEstate_V2', JSON.stringify(properties));
-            } catch (e) {
-                alert("الذاكرة ممتلئة! يرجى حذف بعض الإعلانات القديمة التي تحتوي على صور.");
-            }
-        }
+        // إعدادات فايرباس الخاصة بك
+        const firebaseConfig = {
+            apiKey: "AIzaSyBAInCbFZlGJNfwbIAEYb7bNMC22B_nfTw",
+            authDomain: "al-tafylah-aqarat.firebaseapp.com",
+            projectId: "al-tafylah-aqarat",
+            storageBucket: "al-tafylah-aqarat.firebasestorage.app",
+            messagingSenderId: "729805047644",
+            appId: "1:729805047644:web:80eae6947f4bbd908ee399"
+        };
 
-        // دالة التنقل بين التبويبات
-        function switchTab(tabId, btn) {
-            document.querySelectorAll('.section').forEach(function(sec) { sec.classList.remove('active'); });
-            document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // قائمة العقارات العالمية
+        window.properties = [];
+
+        // 🟢 الاستماع المباشر للتغيرات في قاعدة البيانات (تحديث فوري لكل الهواتف)
+        onSnapshot(collection(db, "properties"), (snapshot) => {
+            window.properties = [];
+            snapshot.forEach((doc) => {
+                window.properties.push({ id: doc.id, ...doc.data() });
+            });
+            window.renderBrowse();
+            if (document.getElementById("adminDashboardSection").style.display === "block") {
+                window.renderAdminDashboard();
+            }
+        });
+
+        // دوال التنقل والواجهة
+        window.switchTab = function(tabId, btn) {
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
 
             document.getElementById(tabId).classList.add('active');
             if(btn) btn.classList.add('active');
             
-            if (tabId === 'browseTab') renderBrowse();
-            if (tabId === 'searchTab') filterProperties();
+            if (tabId === 'browseTab') window.renderBrowse();
+            if (tabId === 'searchTab') window.filterProperties();
             if (tabId === 'adminTab' && document.getElementById("adminDashboardSection").style.display === "block") {
-                renderAdminDashboard();
+                window.renderAdminDashboard();
             }
         }
 
-        // دالة إنشاء واجهة الإعلان للزوار
-        function createPropertyHTML(p) {
+        window.createPropertyHTML = function(p) {
             var imgHtml = p.image ? '<img src="' + p.image + '" class="property-image">' : '';
             var cardClass = p.isPinned ? 'property-card pinned' : 'property-card';
             var pinBadge = p.isPinned ? '<span class="badge badge-pinned">📌 إعلان مميز / مثبت</span>' : '';
@@ -239,21 +247,18 @@
                    '</div>';
         }
 
-        // دالة فرز وترتيب الإعلانات (المثبت أولاً، ثم الأحدث للأقدم)
-        function sortProperties(listArray) {
-            return listArray.sort(function(a, b) {
+        window.sortProperties = function(listArray) {
+            return listArray.sort((a, b) => {
                 if (a.isPinned && !b.isPinned) return -1;
                 if (!a.isPinned && b.isPinned) return 1;
-                return b.id - a.id;
+                return b.createdAt - a.createdAt; // الأحدث أولاً
             });
         }
 
-        // عرض العقارات للزوار
-        function renderBrowse() {
+        window.renderBrowse = function() {
             var list = document.getElementById("approvedPropertiesList");
-            var approved = properties.filter(function(p) { return p.status === 'approved'; });
-            
-            sortProperties(approved);
+            var approved = window.properties.filter(p => p.status === 'approved');
+            window.sortProperties(approved);
             
             if(approved.length === 0) {
                 list.innerHTML = "<p style='text-align:center; color:#777; font-size:13px;'>لا توجد إعلانات منشورة حالياً.</p>";
@@ -261,78 +266,88 @@
             }
             
             var html = '';
-            for(var i = 0; i < approved.length; i++) {
-                html += createPropertyHTML(approved[i]);
-            }
+            approved.forEach(p => html += window.createPropertyHTML(p));
             list.innerHTML = html;
         }
 
-        // إضافة عقار جديد
-        function addNewProperty() {
+        // 🟢 إضافة عقار جديد إلى السحابة
+        window.addNewProperty = async function() {
             var type = document.getElementById("newType").value;
             var loc = document.getElementById("newLocation").value;
             var price = document.getElementById("newPrice").value;
             var details = document.getElementById("newDetails").value;
             var phone = document.getElementById("newUserPhone").value;
             var imageInput = document.getElementById("newImage");
+            var addBtn = document.getElementById("addBtn");
 
             if(!loc || !phone) {
                 alert("يرجى تعبئة المنطقة ورقم الهاتف على الأقل!");
                 return;
             }
 
-            var id = Date.now(); 
+            addBtn.innerText = "جاري الرفع...";
+            addBtn.disabled = true;
 
             if (imageInput.files && imageInput.files[0]) {
                 var file = imageInput.files[0];
-                if (file.size > 2 * 1024 * 1024) {
-                    alert("حجم الصورة كبير جداً، يرجى اختيار صورة أصغر من 2 ميجا.");
+                if (file.size > 800 * 1024) { // الحد الأقصى 800 كيلوبايت للسحابة
+                    alert("حجم الصورة كبير جداً، يرجى اختيار صورة أصغر من 800 كيلوبايت.");
+                    addBtn.innerText = "نشر العقار (بانتظار الموافقة)";
+                    addBtn.disabled = false;
                     return;
                 }
                 var reader = new FileReader();
-                reader.onload = function(e) {
-                    saveNewRecord(id, type, loc, price, details, phone, e.target.result);
+                reader.onload = async function(e) {
+                    await window.saveNewRecord(type, loc, price, details, phone, e.target.result);
+                    addBtn.innerText = "نشر العقار (بانتظار الموافقة)";
+                    addBtn.disabled = false;
                 };
                 reader.readAsDataURL(file);
             } else {
-                saveNewRecord(id, type, loc, price, details, phone, "");
+                await window.saveNewRecord(type, loc, price, details, phone, "");
+                addBtn.innerText = "نشر العقار (بانتظار الموافقة)";
+                addBtn.disabled = false;
             }
         }
 
-        function saveNewRecord(id, type, loc, price, details, phone, img) {
-            properties.unshift({
-                id: id,
-                type: type,
-                location: loc,
-                price: price ? price + " دينار" : "غير محدد",
-                details: details,
-                phone: phone,
-                image: img,
-                status: "pending",
-                isPinned: false
-            });
-            saveProperties();
-            alert("تم إرسال إعلانك بنجاح! سيتم مراجعته من قبل الإدارة.");
-            
-            document.getElementById("newLocation").value = "";
-            document.getElementById("newPrice").value = "";
-            document.getElementById("newDetails").value = "";
-            document.getElementById("newUserPhone").value = "";
-            document.getElementById("newImage").value = "";
+        window.saveNewRecord = async function(type, loc, price, details, phone, img) {
+            try {
+                await addDoc(collection(db, "properties"), {
+                    type: type,
+                    location: loc,
+                    price: price ? price + " دينار" : "غير محدد",
+                    details: details,
+                    phone: phone,
+                    image: img,
+                    status: "pending",
+                    isPinned: false,
+                    createdAt: Date.now()
+                });
+                alert("تم إرسال إعلانك بنجاح! سيتم مراجعته من قبل الإدارة.");
+                
+                // تفريغ الحقول
+                document.getElementById("newLocation").value = "";
+                document.getElementById("newPrice").value = "";
+                document.getElementById("newDetails").value = "";
+                document.getElementById("newUserPhone").value = "";
+                document.getElementById("newImage").value = "";
+            } catch (error) {
+                console.error(error);
+                alert("حدث خطأ أثناء الرفع، تأكد من تفعيل Firestore في وضع الاختبار.");
+            }
         }
 
-        // البحث
-        function filterProperties() {
+        window.filterProperties = function() {
             var query = document.getElementById("searchInput").value.toLowerCase();
             var list = document.getElementById("searchResultsList");
-            var filtered = properties.filter(function(p) { 
-                return p && p.status === 'approved' && 
-                ((p.location && p.location.toLowerCase().indexOf(query) !== -1) || 
-                 (p.type && p.type.toLowerCase().indexOf(query) !== -1) || 
-                 (p.details && p.details.toLowerCase().indexOf(query) !== -1));
-            });
+            var filtered = window.properties.filter(p => 
+                p.status === 'approved' && 
+                ((p.location && p.location.toLowerCase().includes(query)) || 
+                 (p.type && p.type.toLowerCase().includes(query)) || 
+                 (p.details && p.details.toLowerCase().includes(query)))
+            );
 
-            sortProperties(filtered);
+            window.sortProperties(filtered);
 
             if (filtered.length === 0) {
                 list.innerHTML = "<p style='text-align:center; color:#777; font-size:13px;'>لا توجد نتائج مطابقة.</p>";
@@ -340,38 +355,34 @@
             }
 
             var html = '';
-            for(var i = 0; i < filtered.length; i++) {
-                html += createPropertyHTML(filtered[i]);
-            }
+            filtered.forEach(p => html += window.createPropertyHTML(p));
             list.innerHTML = html;
         }
 
-        // تسجيل دخول الإدارة
-        function checkAdminPassword() {
+        window.checkAdminPassword = function() {
             if(document.getElementById("adminPassword").value === "MKF@mkf1999") {
                 document.getElementById("adminLoginSection").style.display = "none";
                 document.getElementById("adminDashboardSection").style.display = "block";
-                renderAdminDashboard();
+                window.renderAdminDashboard();
             } else {
                 alert("كلمة المرور غير صحيحة!");
             }
         }
 
-        // تصميم بطاقة الأدمن
-        function createAdminCardHTML(p, isPending) {
+        window.createAdminCardHTML = function(p, isPending) {
             var imgHtml = p.image ? '<img src="' + p.image + '" class="property-image">' : '';
             var badgeHtml = isPending 
                 ? '<span class="badge badge-pending">بانتظار الموافقة</span>' 
                 : (p.isPinned ? '<span class="badge badge-approved">إعلان منشور</span><span class="badge badge-pinned">📌 مثبت في الأعلى</span>' : '<span class="badge badge-approved">إعلان منشور</span>');
 
-            var buttonsHtml = '';
             var cardClass = (p.isPinned && !isPending) ? 'property-card pinned' : 'property-card';
+            var buttonsHtml = '';
 
             if (isPending) {
                 buttonsHtml = 
                 '<div id="actions_' + p.id + '" class="actions-btn">' +
-                    '<button class="btn-sm btn-approve" onclick="approveAd(' + p.id + ')">قبول ✅</button>' +
-                    '<button class="btn-sm btn-delete" onclick="showConfirm(' + p.id + ')">رفض ❌</button>' +
+                    '<button class="btn-sm btn-approve" onclick="approveAd(\'' + p.id + '\')">قبول ✅</button>' +
+                    '<button class="btn-sm btn-delete" onclick="showConfirm(\'' + p.id + '\')">رفض ❌</button>' +
                 '</div>';
             } else {
                 var pinBtnText = p.isPinned ? 'إلغاء التثبيت 🔓' : 'تثبيت في الأعلى 📌';
@@ -379,8 +390,8 @@
                 
                 buttonsHtml = 
                 '<div id="actions_' + p.id + '" class="actions-btn">' +
-                    '<button class="' + pinBtnClass + '" onclick="togglePinAd(' + p.id + ')">' + pinBtnText + '</button>' +
-                    '<button class="btn-sm btn-delete" onclick="showConfirm(' + p.id + ')">حذف 🗑️</button>' +
+                    '<button class="' + pinBtnClass + '" onclick="togglePinAd(\'' + p.id + '\')">' + pinBtnText + '</button>' +
+                    '<button class="btn-sm btn-delete" onclick="showConfirm(\'' + p.id + '\')">حذف 🗑️</button>' +
                 '</div>';
             }
 
@@ -388,8 +399,8 @@
                 '<div id="confirm_' + p.id + '" class="confirm-box">' +
                     '<span class="confirm-text">هل أنت متأكد من الحذف نهائياً؟</span>' +
                     '<div class="confirm-actions">' +
-                        '<button class="btn-sm" style="background:#dc3545; color:#fff;" onclick="deleteAd(' + p.id + ')">نعم، احذف</button>' +
-                        '<button class="btn-sm" style="background:#6c757d; color:#fff;" onclick="hideConfirm(' + p.id + ')">تراجع</button>' +
+                        '<button class="btn-sm" style="background:#dc3545; color:#fff;" onclick="deleteAd(\'' + p.id + '\')">نعم، احذف</button>' +
+                        '<button class="btn-sm" style="background:#6c757d; color:#fff;" onclick="hideConfirm(\'' + p.id + '\')">تراجع</button>' +
                     '</div>' +
                 '</div>';
 
@@ -405,93 +416,49 @@
                    '</div>';
         }
 
-        // عرض لوحة الإدارة
-        function renderAdminDashboard() {
+        window.renderAdminDashboard = function() {
             var pendingList = document.getElementById("adminPendingList");
             var approvedList = document.getElementById("adminApprovedList");
             
-            var sortedProperties = properties.slice();
-            sortProperties(sortedProperties);
+            var sortedProperties = window.properties.slice();
+            window.sortProperties(sortedProperties);
 
             var pendingHtml = '';
             var approvedHtml = '';
 
-            for(var i = 0; i < sortedProperties.length; i++) {
-                if(sortedProperties[i].status === 'pending') {
-                    pendingHtml += createAdminCardHTML(sortedProperties[i], true);
-                } else if(sortedProperties[i].status === 'approved') {
-                    approvedHtml += createAdminCardHTML(sortedProperties[i], false);
-                }
-            }
+            sortedProperties.forEach(p => {
+                if(p.status === 'pending') pendingHtml += window.createAdminCardHTML(p, true);
+                if(p.status === 'approved') approvedHtml += window.createAdminCardHTML(p, false);
+            });
 
             pendingList.innerHTML = pendingHtml || "<p style='text-align:center; color:#777;'>لا توجد إعلانات معلقة.</p>";
             approvedList.innerHTML = approvedHtml || "<p style='text-align:center; color:#777;'>لا توجد إعلانات منشورة.</p>";
         }
 
-        function togglePinAd(id) {
-            for(var i = 0; i < properties.length; i++) {
-                if(properties[i].id === id) {
-                    properties[i].isPinned = !properties[i].isPinned;
-                    break;
-                }
-            }
-            saveProperties();
-            renderAdminDashboard();
-            renderBrowse();
+        // 🟢 دوال التعديل على السحابة (قبول، حذف، تثبيت)
+        window.togglePinAd = async function(id) {
+            const p = window.properties.find(prop => prop.id === id);
+            if(p) await updateDoc(doc(db, "properties", id), { isPinned: !p.isPinned });
         }
 
-        function approveAd(id) {
-            for(var i = 0; i < properties.length; i++) {
-                if(properties[i].id === id) {
-                    properties[i].status = 'approved';
-                    break;
-                }
-            }
-            saveProperties();
-            renderAdminDashboard();
+        window.approveAd = async function(id) {
+            await updateDoc(doc(db, "properties", id), { status: 'approved' });
         }
 
-        function showConfirm(id) {
+        window.deleteAd = async function(id) {
+            await deleteDoc(doc(db, "properties", id));
+        }
+
+        window.showConfirm = function(id) {
             document.getElementById('actions_' + id).style.display = 'none';
             document.getElementById('confirm_' + id).style.display = 'flex';
         }
 
-        function hideConfirm(id) {
+        window.hideConfirm = function(id) {
             document.getElementById('confirm_' + id).style.display = 'none';
             document.getElementById('actions_' + id).style.display = 'flex';
         }
 
-        function deleteAd(id) {
-            var newArray = [];
-            for(var i = 0; i < properties.length; i++) {
-                if(properties[i].id !== id) {
-                    newArray.push(properties[i]);
-                }
-            }
-            properties = newArray;
-            saveProperties();
-            renderAdminDashboard();
-            renderBrowse(); 
-        }
-
-        renderBrowse();
     </script>
-
-    <!-- كود ربط Firebase المدمج -->
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-
-      const firebaseConfig = {
-        apiKey: "AIzaSyBAInCbFZlGJNfwbIAEYb7bNMC22B_nfTw",
-        authDomain: "al-tafylah-aqarat.firebaseapp.com",
-        projectId: "al-tafylah-aqarat",
-        storageBucket: "al-tafylah-aqarat.firebasestorage.app",
-        messagingSenderId: "729805047644",
-        appId: "1:729805047644:web:80eae6947f4bbd908ee399"
-      };
-
-      const app = initializeApp(firebaseConfig);
-    </script>
-
 </body>
 </html>

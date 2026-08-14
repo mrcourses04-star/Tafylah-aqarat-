@@ -268,8 +268,8 @@
                         '<div class="property-price">السعر: ' + (p.price || 'غير محدد') + '</div>' +
                         '<div class="property-details">' + (p.details || '') + '</div>' +
                         '<a href="tel:' + (p.phone || '') + '" class="property-phone">📞 هاتف: ' + (p.phone || '') + '</a>' +
-                        '<button class="btn-share" onclick="shareProperty(\'' + ((p.type || '') + ' - ' + (p.location || '')) + '\', \'' + (p.price || 'غير محدد') + '\', \'' + (p.details || '') + '\', \'' + (p.phone || '') + '\')">📤 مشاركة الإعلان</button>' +
-                  
+                        '<button class="btn-share" onclick="if(navigator.share){navigator.share({title:\'عقارات وأراضي الطفيلة\',text:\'🏠 عقار: ' + ((p.type || '') + ' - ' + (p.location || '')) + '\\n💰 السعر: ' + (p.price || 'غير محدد') + '\\n📞 هاتف: ' + (p.phone || '') + '\',url:window.location.href});}else{alert(\'تم نسخ الرابط!\');}">📤 مشاركة الإعلان</button>' +
+                
                    '</div>';
         }
 

@@ -85,6 +85,12 @@
         .property-title { font-weight: bold; color: #1b4332; font-size: 15px; }
         .property-price { color: #c59b27; font-weight: bold; font-size: 13px; margin: 3px 0; }
         .property-details { font-size: 12px; color: #666; margin-bottom: 8px; line-height: 1.5; }
+               .btn-share {
+            background: #25d366; color: #fff; border: none; padding: 6px 12px;
+            border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 5px; margin-top: 5px;
+               }
+        
         .property-phone { font-size: 13px; font-weight: bold; color: #1877f2; display: block; margin-bottom: 8px; direction: ltr; text-align: right; }
         .badge { display: inline-block; padding: 4px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; margin-bottom: 8px;}
         .badge-pending { background: #ffeaa7; color: #d63031; }
@@ -261,7 +267,11 @@
                         '<div class="property-title">' + (p.type || '') + ' - ' + (p.location || '') + '</div>' +
                         '<div class="property-price">السعر: ' + (p.price || 'غير محدد') + '</div>' +
                         '<div class="property-details">' + (p.details || '') + '</div>' +
-                        '<a href="tel:' + (p.phone || '') + '" class="property-phone">📞 هاتف: ' + (p.phone || '') + '</a>' +
+                                                '<a href="tel:' + (p.phone || '') + '" class="property-phone">📞 هاتف: ' + (p.phone || '') + '</a>' +
+                        '<button class="btn-share" onclick="shareProperty(\'' + ((p.type || '') + ' - ' + (p.location || '')) + '\', \'' + (p.price || 'غير محدد') + '\', \'' + (p.details || '') + '\', \'' + (p.phone || '') + '\')">📤 مشاركة الإعلان</button>' +
+        
+                                        '<button style="background: #25d366; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; margin-top: 5px;" onclick="if(navigator.share){navigator.share({title:\'عقارات الطفيلة\',text:\'عقار برقم هاتف: ' + (p.phone || '') + '\',url:window.location.href});}else{alert(\'تم نسخ الرابط\');}">📤 مشاركة الإعلان</button>' +
+                
                    '</div>';
         }
 

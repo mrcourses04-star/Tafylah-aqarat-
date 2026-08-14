@@ -1,6 +1,22 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <!-- إعدادات محرك البحث جوجل (SEO) -->
+<title>عقارات الطفيلة | بيع وشراء واستئجار العقارات</title>
+<meta name="description" content="تطبيق عقارات الطفيلة لبيع وشراء واستئجار الشقق والأراضي والعقارات في محافظة الطفيلة بسهولة وسرعة.">
+<meta name="keywords" content="عقارات الطفيلة, شقق للايجار الطفيلة, اراضي للبيع الطفيلة, عقارات الأردن">
+
+<!-- كود إشعارات OneSignal جاهز -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "9809202d-19a6-4045-b605-fc99c8390935",
+    });
+  });
+</script>
+    
     <link rel="manifest" href="manifest.json">
 
     <meta charset="UTF-8">
@@ -500,6 +516,40 @@
   });
 </script>
     
+ <!-- شريط الأزرار السريعة: اتصال + واتساب + مشاركة -->
+<div style="position: fixed; bottom: 20px; left: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 9999;">
+  
+  <!-- زر الواتساب -->
+  <a href="https://wa.me/9627XXXXXXXX" target="_blank" title="تواصل عبر الواتساب" style="background: #25d366; color: white; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); text-decoration: none; font-size: 22px;">
+    💬
+  </a>
+
+  <!-- زر الاتصال الهاتفي -->
+  <a href="tel:+9627XXXXXXXX" title="اتصال تلفوني" style="background: #007bff; color: white; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); text-decoration: none; font-size: 22px;">
+    📞
+  </a>
+
+  <!-- زر المشاركة -->
+  <button onclick="shareApp()" title="مشاركة التطبيق" style="background: #ff9800; color: white; width: 48px; height: 48px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; font-size: 22px;">
+    📤
+  </button>
+
+</div>
+
+<script>
+  function shareApp() {
+    if (navigator.share) {
+      navigator.share({
+        title: 'عقارات الطفيلة',
+        text: 'تفقّد أحدث العقارات والشقق المتاحة في الطفيلة عبر هذا التطبيق!',
+        url: window.location.href,
+      }).catch(console.error);
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      alert('تم نسخ رابط الموقع بنجاح!');
+    }
+  }
+      </script>
     
 </body>
 </html>

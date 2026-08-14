@@ -515,29 +515,12 @@
     }
   });
 </script>
-    <!-- زر تفعيل الإشعارات المنمق والجديد -->
-<button onclick="triggerOneSignalPrompt()" style="background: #ff5722; color: white; width: 48px; height: 48px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; font-size: 22px; transition: transform 0.2s ease;" title="تفعيل التنبيهات والأخبار">
+    <!-- زر جرس الإشعارات المنسق -->
+<button onclick="OneSignal.registerForPushNotifications();" 
+        style="background: #ff9800; color: white; width: 48px; height: 48px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; font-size: 24px; margin-bottom: 10px;" 
+        title="اشترك في التنبيهات">
   🔔
 </button>
-
-<script>
-  function triggerOneSignalPrompt() {
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    window.OneSignalDeferred.push(async function(OneSignal) {
-      try {
-        // محاولة إظهار شاشة الإذن المدمجة الحديثة
-        if (OneSignal.Slidedown && typeof OneSignal.Slidedown.promptPush === 'function') {
-          await OneSignal.Slidedown.promptPush();
-        } else {
-          // الطريقة البديلة في حال عدم توفر الـ Slidedown
-          await OneSignal.showNativePrompt();
-        }
-      } catch (error) {
-        console.log("Notification prompt error: ", error);
-      }
-    });
-  }
-</script>
     
     
  <!-- شريط الأزرار السريعة: اتصال + واتساب + مشاركة -->

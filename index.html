@@ -515,30 +515,19 @@
     }
   });
 </script>
-    <!-- زر الاشتراك في الإشعارات المحدث -->
-<button onclick="subscribeOneSignal()" style="background: #ff5722; color: white; width: 48px; height: 48px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; font-size: 20px;" title="اشترك في التنبيهات">
+    <!-- زر الإشعارات الدائري المنسق -->
+<button onclick="subscribeOneSignal()" style="background: #ff5722; color: white; width: 48px; height: 48px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; font-size: 22px;" title="اشترك في التنبيهات">
   🔔
 </button>
 
 <script>
   function subscribeOneSignal() {
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    window.OneSignalDeferred.push(async function(OneSignal) {
-      try {
-        await OneSignal.Slidedown.promptPush();
-      } catch (e) {
-        console.log(e);
-      }
+    OneSignalDeferred.push(function(OneSignal) {
+      OneSignal.showSlidedownPrompt();
     });
   }
 </script>
     
-  document.getElementById('onesignal-button').addEventListener('click', function() {
-    OneSignalDeferred.push(function(OneSignal) {
-      OneSignal.showNativePrompt();
-    });
-  });
-</script>
     
     
  <!-- شريط الأزرار السريعة: اتصال + واتساب + مشاركة -->

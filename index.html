@@ -6,16 +6,7 @@
 <meta name="description" content="تطبيق عقارات الطفيلة لبيع وشراء واستئجار الشقق والأراضي والعقارات في محافظة الطفيلة بسهولة وسرعة.">
 <meta name="keywords" content="عقارات الطفيلة, شقق للايجار الطفيلة, اراضي للبيع الطفيلة, عقارات الأردن">
 
-<!-- كود إشعارات OneSignal جاهز -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "9809202d-19a6-4045-b605-fc99c8390935",
-    });
-  });
-</script>
+
     
     <link rel="manifest" href="manifest.json">
 
@@ -484,21 +475,6 @@
             document.getElementById('confirm_' + id).style.display = 'none';
             document.getElementById('actions_' + id).style.display = 'flex';
         }
-// دالة طلب إذن الإشعارات وتوليد رمز الجهاز
-function requestNotificationPermission() {
-    if (!("Notification" in window)) {
-        alert("متصفحك لا يدعم إشعارات سطح المكتب");
-        return;
-    }
-
-    Notification.requestPermission().then(function(permission) {
-        if (permission === "granted") {
-            alert("تم تفعيل الإشعارات بنجاح! ستتلقى تنبيهات العقارات الجديدة.");
-        } else {
-            alert("تم رفض إذن الإشعارات. يمكنك تفعيلها لاحقاً من إعدادات المتصفح.");
-        }
-    });
-}
         
     </script>
     <!-- شريط تنبيه التثبيت المنبثق -->

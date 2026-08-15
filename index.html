@@ -545,6 +545,41 @@
     }
   }
       </script>
+  <!-- كود إشعارات فايربيس -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBAInCbFZ1GJnfwIAEYb7bNMC22B_nfTw",
+    authDomain: "al-tafylah-aqarat.firebaseapp.com",
+    projectId: "al-tafylah-aqarat",
+    storageBucket: "al-tafylah-aqarat.firebasestorage.app",
+    messagingSenderId: "729805047644",
+    appId: "1:729805047644:web:80eae6947f4bbd908ee399"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const messaging = getMessaging(app);
+
+  window.requestNotificationPermission = async () => {
+    try {
+      const token = await getToken(messaging, { 
+        vapidKey: 'BDrC3ir0aOEX7XkuItDqhZ67roRPBP3tkxySaa8Znnkny0ohWuq1-joOIlTMct5hmfIVB2bsU7IlLzEOKXiEhOM' 
+      });
+      if (token) {
+        console.log("تم الحصول على الرمز:", token);
+        alert("تم تفعيل الإشعارات بنجاح!");
+      }
+    } catch (err) {
+      console.error("خطأ في تفعيل الإشعارات:", err);
+    }
+  };
+</script>
+
+<button onclick="requestNotificationPermission()" style="margin: 20px; padding: 10px 20px; background-color: #ff4757; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  اشترك في إشعارات العقارات الجديدة
+</button>
     
 </body>
 </html>

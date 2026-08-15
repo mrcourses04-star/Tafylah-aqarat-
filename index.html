@@ -545,6 +545,7 @@
     }
   }
       </script>
+    
 <!-- كود إشعارات فايربيس -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -564,20 +565,27 @@
 
   window.requestNotificationPermission = async () => {
     try {
-      const token = await getToken(messaging, { 
-        vapidKey: 'BDrC3ir0aOEX7XkuItDqhZ67roRPBP3tkxySaa8Znnkny0ohWuq1-joOIlTMct5hmfIVB2bsU7IlLzEOKXiEhOM' 
-      });
-      if (token) {
-        console.log("تم الحصول على الرمز:", token);
-        alert("تم تفعيل الإشعارات بنجاح!");
+      // 1. إجبار المتصفح على إظهار نافذة الموافقة أولاً
+      const permission = await Notification.requestPermission();
+      
+      // 2. التحقق من موافقة المستخدم
+      if (permission === 'granted') {
+        const token = await getToken(messaging, { 
+          vapidKey: 'BDrC3ir0aOEX7XkuItDqhZ67roRPBP3tkxySaa8Znnkny0ohWuq1-joOIlTMct5hmfIVB2bsU7IlLzEOKXiEhOM' 
+        });
+        if (token) {
+          console.log("تم الحصول على الرمز:", token);
+          alert("تم تفعيل الإشعارات بنجاح!");
+        }
+      } else {
+        alert("لم يتم منح إذن الإشعارات.");
       }
     } catch (err) {
       console.error("خطأ في تفعيل الإشعارات:", err);
     }
   };
 </script>
-
-
+    
 <!-- زر الإشعارات الدائري العائم -->
 <button onclick="requestNotificationPermission()" style="position: fixed; top: 15px; right: 15px; width: 50px; height: 50px; border-radius: 50%; background-color: #f39c12; color: white; border: none; box-shadow: 0 4px 8px rgba(0,0,0,0.3); font-size: 24px; z-index: 9999; cursor: pointer; display: flex; align-items: center; justify-content: center;">
   🔔

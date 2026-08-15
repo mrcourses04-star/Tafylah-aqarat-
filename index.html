@@ -549,7 +549,8 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
-
+  import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    
   const firebaseConfig = {
     apiKey: "AIzaSyBAInCbFZ1GJnfwIAEYb7bNMC22B_nfTw",
     authDomain: "al-tafylah-aqarat.firebaseapp.com",
@@ -560,21 +561,28 @@
   };
 
   const app = initializeApp(firebaseConfig);
-  const messaging = getMessaging(app);
+const messaging = getMessaging(app);
+const db = getFirestore(app);
 
-  window.requestNotificationPermission = async () => {
-    try {
-      const token = await getToken(messaging, { 
-        vapidKey: 'BDrC3ir0aOEX7XkuItDqhZ67roRPBP3tkxySaa8Znnkny0ohWuq1-joOIlTMct5hmfIVB2bsU7IlLzEOKXiEhOM' 
+window.requestNotificationPermission = async () => {
+  try {
+    const token = await getToken(messaging, { 
+      vapidKey: 'BDrC3ir0aOEX7XkuItDqhZ67roRPBP3tkxySaa8Znnkny0ohWuq1-joOIlTMct5hmfIVB2bsU7IlLzEOKXiEhOM' 
+    });
+    
+    if (token) {
+      await setDoc(doc(db, "tokens", token), {
+        token: token,
+        createdAt: new Date()
       });
-      if (token) {
-        console.log("تم الحصول على الرمز:", token);
-        alert("تم تفعيل الإشعارات بنجاح!");
-      }
-    } catch (err) {
-      console.error("خطأ في تفعيل الإشعارات:", err);
+      console.log("تم حفظ الرمز في القاعدة:", token);
+      alert("تم تفعيل الإشعارات بنجاح!");
     }
-  };
+  } catch (err) {
+    console.error("خطأ في تفعيل الإشعارات:", err);
+  }
+};
+    
 </script>
 
 <!-- زر الإشعارات الدائري العائم -->

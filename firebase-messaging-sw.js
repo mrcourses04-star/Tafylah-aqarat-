@@ -1,8 +1,8 @@
-importScripts('https://www.gstatic.com/firebasejs/12.17.1/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/12.17.1/firebase-messaging-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
 firebase.initializeApp({
-  apiKey: "AIzaSyBAInCbFZlGJNfwbIAEYb7bNMC22B_nfTw",
+  apiKey: "AIzaSyBAInCbFZ1GJnfwIAEYb7bNMC22B_nfTw",
   authDomain: "al-tafylah-aqarat.firebaseapp.com",
   projectId: "al-tafylah-aqarat",
   storageBucket: "al-tafylah-aqarat.firebasestorage.app",

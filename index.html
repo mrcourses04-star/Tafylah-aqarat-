@@ -545,12 +545,11 @@
     }
   }
       </script>
-  <!-- كود إشعارات فايربيس -->
+<!-- كود إشعارات فايربيس -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
-  import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    
+
   const firebaseConfig = {
     apiKey: "AIzaSyBAInCbFZ1GJnfwIAEYb7bNMC22B_nfTw",
     authDomain: "al-tafylah-aqarat.firebaseapp.com",
@@ -561,29 +560,23 @@
   };
 
   const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
-const db = getFirestore(app);
+  const messaging = getMessaging(app);
 
-window.requestNotificationPermission = async () => {
-  try {
-    const token = await getToken(messaging, { 
-      vapidKey: 'BDrC3ir0aOEX7XkuItDqhZ67roRPBP3tkxySaa8Znnkny0ohWuq1-joOIlTMct5hmfIVB2bsU7IlLzEOKXiEhOM' 
-    });
-    
-    if (token) {
-      await setDoc(doc(db, "tokens", token), {
-        token: token,
-        createdAt: new Date()
+  window.requestNotificationPermission = async () => {
+    try {
+      const token = await getToken(messaging, { 
+        vapidKey: 'BDrC3ir0aOEX7XkuItDqhZ67roRPBP3tkxySaa8Znnkny0ohWuq1-joOIlTMct5hmfIVB2bsU7IlLzEOKXiEhOM' 
       });
-      console.log("تم حفظ الرمز في القاعدة:", token);
-      alert("تم تفعيل الإشعارات بنجاح!");
+      if (token) {
+        console.log("تم الحصول على الرمز:", token);
+        alert("تم تفعيل الإشعارات بنجاح!");
+      }
+    } catch (err) {
+      console.error("خطأ في تفعيل الإشعارات:", err);
     }
-  } catch (err) {
-    console.error("خطأ في تفعيل الإشعارات:", err);
-  }
-};
-    
+  };
 </script>
+
 
 <!-- زر الإشعارات الدائري العائم -->
 <button onclick="requestNotificationPermission()" style="position: fixed; top: 15px; right: 15px; width: 50px; height: 50px; border-radius: 50%; background-color: #f39c12; color: white; border: none; box-shadow: 0 4px 8px rgba(0,0,0,0.3); font-size: 24px; z-index: 9999; cursor: pointer; display: flex; align-items: center; justify-content: center;">

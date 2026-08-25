@@ -1,8 +1,9 @@
+/* عقارات الطفيلة - Firebase Cloud Messaging Service Worker */
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
 firebase.initializeApp({
-  apiKey: "AIzaSyBAInCbFZ1GJnfwIAEYb7bNMC22_B_nfTw",
+  apiKey: "AIzaSyBAInCbFZlGJNfwbIAEY7b7bNMC22_B_nfTw",
   authDomain: "al-tafylah-aqarat.firebaseapp.com",
   projectId: "al-tafylah-aqarat",
   storageBucket: "al-tafylah-aqarat.firebasestorage.app",
@@ -12,57 +13,66 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// استقبال إشعارات Firebase عندما يكون التطبيق في الخلفية أو مغلقاً.
 messaging.onBackgroundMessage((payload) => {
-  console.log(
-    '[firebase-messaging-sw.js] Background message received:',
-    payload
-  );
+  console.log('[FCM] Background message received:', payload);
+
+  const data = payload?.data || {};
 
   const notificationTitle =
-    payload.notification?.title ||
-    payload.data?.title ||
+    data.title ||
+    payload?.notification?.title ||
     'عقارات الطفيلة';
 
   const notificationOptions = {
     body:
-      payload.notification?.body ||
-      payload.data?.body ||
+      data.body ||
+      payload?.notification?.body ||
       'لديك إشعار جديد',
 
     icon:
-      payload.notification?.icon ||
-      payload.data?.icon ||
-      '/icon-192.png',
+      data.icon ||
+      new URL('icon-192.png', self.registration.scope).href,
 
     badge:
-      payload.notification?.badge ||
-      payload.data?.badge ||
-      '/icon-192.png',
+      data.badge ||
+      new URL('icon-192.png', self.registration.scope).href,
 
-    data: payload.data || {},
+    data,
 
     tag:
-      payload.data?.tag ||
+      data.tag ||
       'al-tafylah-aqarat-notification',
 
-    renotify: true
+    renotify: true,
+
+    dir: 'rtl',
+    lang: 'ar'
   };
 
-  self.registration.showNotification(
+  return self.registration.showNotification(
     notificationTitle,
     notificationOptions
   );
 });
 
-// فتح التطبيق عند الضغط على الإشعار.
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  const targetUrl =
+  const rawTarget =
     event.notification?.data?.url ||
     event.notification?.data?.click_action ||
-    '/';
+    self.registration.scope;
+
+  let targetUrl;
+
+  try {
+    targetUrl = new URL(
+      rawTarget,
+      self.registration.scope
+    ).href;
+  } catch (_) {
+    targetUrl = self.registration.scope;
+  }
 
   event.waitUntil(
     clients.matchAll({
@@ -71,15 +81,25 @@ self.addEventListener('notificationclick', (event) => {
     }).then((clientList) => {
 
       for (const client of clientList) {
-        if ('focus' in client) {
-          return client.focus();
-        }
+        try {
+          const clientUrl = new URL(client.url);
+          const wantedUrl = new URL(targetUrl);
+
+          if (
+            clientUrl.origin === wantedUrl.origin &&
+            'focus' in client
+          ) {
+            return client.focus();
+          }
+
+        } catch (_) {}
       }
 
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }
 
+      return undefined;
     })
   );
 });

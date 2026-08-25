@@ -2,7 +2,7 @@ importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
 firebase.initializeApp({
-  apiKey: "AIzaSyBAInCbFZ1GnfwIAEYb7bNMC22B_nfTw",
+  apiKey: "AIzaSyBAInCbFZ1GJnfwIAEYb7bNMC22_B_nfTw",
   authDomain: "al-tafylah-aqarat.firebaseapp.com",
   projectId: "al-tafylah-aqarat",
   storageBucket: "al-tafylah-aqarat.firebasestorage.app",
@@ -12,6 +12,7 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
+// استقبال إشعارات Firebase عندما يكون التطبيق في الخلفية أو مغلقاً.
 messaging.onBackgroundMessage((payload) => {
   console.log(
     '[firebase-messaging-sw.js] Background message received:',
@@ -32,18 +33,18 @@ messaging.onBackgroundMessage((payload) => {
     icon:
       payload.notification?.icon ||
       payload.data?.icon ||
-      './icon-192.png',
+      '/icon-192.png',
 
     badge:
       payload.notification?.badge ||
       payload.data?.badge ||
-      './icon-192.png',
+      '/icon-192.png',
 
     data: payload.data || {},
 
     tag:
       payload.data?.tag ||
-      'al-tafylah-notification',
+      'al-tafylah-aqarat-notification',
 
     renotify: true
   };
@@ -54,13 +55,14 @@ messaging.onBackgroundMessage((payload) => {
   );
 });
 
+// فتح التطبيق عند الضغط على الإشعار.
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
   const targetUrl =
     event.notification?.data?.url ||
     event.notification?.data?.click_action ||
-    './';
+    '/';
 
   event.waitUntil(
     clients.matchAll({
@@ -77,6 +79,7 @@ self.addEventListener('notificationclick', (event) => {
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }
+
     })
   );
 });

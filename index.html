@@ -1019,18 +1019,12 @@ button[onclick="requestNotificationPermission()"]{
 
     <!-- كود فايرباس والسكربت المدمج للعمل السحابي -->
     <script type="module">
+        import "./firebase-config.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, query, where, orderBy, limit, startAfter, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         // إعدادات فايرباس الخاصة بك
-        const firebaseConfig = {
-            apiKey: "AIzaSyBAInCbFZlGJNfwbIAEYb7bNMC22B_nfTw",
-            authDomain: "al-tafylah-aqarat.firebaseapp.com",
-            projectId: "al-tafylah-aqarat",
-            storageBucket: "al-tafylah-aqarat.firebasestorage.app",
-            messagingSenderId: "729805047644",
-            appId: "1:729805047644:web:80eae6947f4bbd908ee399"
-        };
+        const firebaseConfig = globalThis.tafylahFirebaseConfig;
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
@@ -2177,7 +2171,7 @@ button[onclick="requestNotificationPermission()"]{
       // المسار النسبي يجعل Service Worker يعمل أيضاً داخل GitHub Pages.
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {
-          const swPath = new URL('sw.js', window.location.href).pathname;
+          const swPath = new URL('./firebase-messaging-sw.js', window.location.href).pathname;
           navigator.serviceWorker.register(swPath)
             .then(function (registration) {
               console.log('تم تسجيل Service Worker:', registration.scope);
@@ -2258,40 +2252,80 @@ button[onclick="requestNotificationPermission()"]{
     
 <!-- كود إشعارات فايربيس -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+  import "./firebase-config.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getMessaging, getToken, isSupported, onMessage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBAInCbFZ1GJnfwIAEYb7bNMC22B_nfTw",
-    authDomain: "al-tafylah-aqarat.firebaseapp.com",
-    projectId: "al-tafylah-aqarat",
-    storageBucket: "al-tafylah-aqarat.firebasestorage.app",
-    messagingSenderId: "729805047644",
-    appId: "1:729805047644:web:80eae6947f4bbd908ee399"
-  };
+  const app = initializeApp(globalThis.tafylahFirebaseConfig);
+  const messagingReady = isSupported().then((supported) => {
+    if (!supported) return null;
+    const messaging = getMessaging(app);
+    onMessage(messaging, (payload) => {
+      const title = payload.notification?.title || payload.data?.title || 'عقارات الطفيلة';
+      const body = payload.notification?.body || payload.data?.body || '';
+      alert(title + (body ? '\n' + body : ''));
+    });
+    return messaging;
+  }).catch((error) => {
+    console.error('تعذر تهيئة الإشعارات:', error);
+    return null;
+  });
 
-  const app = initializeApp(firebaseConfig);
-  const messaging = getMessaging(app);
-
+  let notificationRequestPending = false;
   window.requestNotificationPermission = async () => {
+    if (notificationRequestPending) return;
+    notificationRequestPending = true;
     try {
-      // 1. إجبار المتصفح على إظهار نافذة الموافقة أولاً
-      const permission = await Notification.requestPermission();
-      
-      // 2. التحقق من موافقة المستخدم
-      if (permission === 'granted') {
-        const token = await getToken(messaging, { 
-          vapidKey: 'BDrC3ir0aOEX7XkuItDqhZ67roRPBP3tkxySaa8Znnkny0ohWuq1-joOIlTMct5hmfIVB2bsU7IlLzEOKXiEhOM' 
-        });
-        if (token) {
-          console.log("تم الحصول على الرمز:", token);
-          alert("تم تفعيل الإشعارات بنجاح!");
-        }
-      } else {
-        alert("لم يتم منح إذن الإشعارات.");
+      if (!window.isSecureContext || !('Notification' in window) || !('serviceWorker' in navigator)) {
+        alert('الإشعارات غير مدعومة في هذا المتصفح. جرّب متصفحًا يدعم الإشعارات عبر HTTPS.');
+        return;
       }
+      // Request permission directly from the user's button click.
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        alert('لم يتم منح إذن الإشعارات. يمكنك تغييره من إعدادات الموقع في المتصفح.');
+        return;
+      }
+      const messaging = await messagingReady;
+      if (!messaging) {
+        alert('تعذر تشغيل الإشعارات في هذا المتصفح.');
+        return;
+      }
+      const workerUrl = new URL('./firebase-messaging-sw.js', window.location.href);
+      const registration = await navigator.serviceWorker.register(workerUrl.href);
+      // Subscribe only once this specific worker is active; avoid an indefinite wait on installation failure.
+      if (!registration.active) {
+        const worker = registration.installing || registration.waiting;
+        if (!worker) throw new Error('Notification service worker is unavailable');
+        await new Promise((resolve, reject) => {
+          const cleanup = () => {
+            clearTimeout(timer);
+            worker.removeEventListener('statechange', checkState);
+          };
+          const checkState = () => {
+            if (worker.state === 'activated') { cleanup(); resolve(); }
+            else if (worker.state === 'redundant') { cleanup(); reject(new Error('Notification service worker installation failed')); }
+          };
+          const timer = setTimeout(() => {
+            cleanup();
+            reject(new Error('Notification service worker activation timed out'));
+          }, 15000);
+          worker.addEventListener('statechange', checkState);
+          checkState();
+        });
+      }
+      const token = await getToken(messaging, {
+        vapidKey: 'BDrC3ir0aOEX7XkuItDqhZ67roRPBP3tkxySaa8Znnkny0ohWuq1-joOIlTMct5hmfIVB2bsU7IlLzEOKXiEhOM',
+        serviceWorkerRegistration: registration
+      });
+      if (!token) throw new Error('No FCM registration token returned');
+      console.log('تم الحصول على الرمز:', token);
+      alert('تم تفعيل الإشعارات بنجاح!');
     } catch (err) {
-      console.error("خطأ في تفعيل الإشعارات:", err);
+      console.error('خطأ في تفعيل الإشعارات:', err);
+      alert('تعذر تفعيل الإشعارات. حاول مجددًا، وإذا استمرت المشكلة راجع سجل المتصفح.');
+    } finally {
+      notificationRequestPending = false;
     }
   };
 </script>
